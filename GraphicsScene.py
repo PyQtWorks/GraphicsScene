@@ -34,11 +34,16 @@ class GraphicsScene(QWidget):
 
     def addElement(self, element):
         self._nextZValue = self._nextZValue + 0.001  # This will probably never overflow.
-        element.zValue = self._nextZValue
+        element.setZValue(self._nextZValue)
         self.elements.append(element)
         # Sort elements in descending order so that _pick function can pick an element with highest zValue first.
         # This will help in the cases when there are elements on top of each other.
-        self.elements.sort(key=lambda x: x.zValue, reverse=True)  # Descending Order based on zValue.
+        self.elements.sort(key=lambda x: x.getZValue(), reverse=True)  # Descending Order based on zValue.
+
+    def removeElement(self, element):
+        if element in self.elements:
+            self.elements.remove(element)
+            self.update()
 
     def paintEvent(self, *args):
         print("paint")
@@ -162,7 +167,7 @@ class Element:
     def __init__(self, parent):
         self.parent = parent
         self.size = QSize(75, 75)
-        self.zValue = float(0.0)
+        self._zValue = float(0.0)
         self.boundingBox = QRect()
 
     def paint(self, painter):
@@ -175,6 +180,13 @@ class Element:
     def setPosition(self, pos):
         self.boundingBox.moveTopLeft(pos)
         self.update()
+
+    def setZValue(self, value):
+        self._zValue = value
+        self.update()
+
+    def getZValue(self):
+        return self._zValue;
 
     def getPosition(self):
         self.boundingBox.topLeft()
